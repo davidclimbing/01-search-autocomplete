@@ -14,8 +14,9 @@ function App() {
   const fetchResults = async (keyword: string) => {
     setLoading(true);
     try {
-      const response = await searchProducts(query);
+      const response = await searchProducts(keyword);
       setResults(response);
+      console.log(response)
     } catch(e) {
       console.error(e);
     } finally {
