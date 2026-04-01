@@ -41,7 +41,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
     return [];
   }
 
-  const normalizedQuery = query.toLowerCase().trim();
+  const normalizedQuery = query.toLowerCase()?.trim();
 
   return products
     .filter(
