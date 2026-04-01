@@ -11,42 +11,36 @@ function App() {
 
   const debouncedSearchTerm = useDebounce(query, 300);
 
-  const handleKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      await handleSearch(query)
-    }
-  };
-
-  const handleSearch = async (word: string) => {
+  const fetchResults = async (keyword: string) => {
     setLoading(true);
-
     try {
-      const response = await searchProducts(word)
+      const response = await searchProducts(query);
       setResults(response);
-
     } catch(e) {
-      console.error(e)
+      console.error(e);
     } finally {
-      console.log('yes')
       setLoading(false);
     }
   }
 
+  const handleKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      await fetchResults(query)
+    }
+  };
+
+  const handleSearch = async (word: string) => {
+    await fetchResults(word)
+  }
+
   useEffect(() => {
-    const fetchResults = async () => {
+    const autoComplete = async () => {
       if (debouncedSearchTerm) {
-        try {
-          const response = await searchProducts(query);
-          setResults(response);
-        } catch(e) {
-          console.error(e);
-        } finally {
-          setLoading(false);
-        }
+        await fetchResults(query)
       }
     };
 
-    fetchResults();
+    autoComplete();
   }, [debouncedSearchTerm, query]);
 
   return (
