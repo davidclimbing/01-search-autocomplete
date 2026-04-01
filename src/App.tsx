@@ -1,12 +1,15 @@
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useEffect } from 'react';
 import './App.css';
 
 import { searchProducts, Product } from './api/products';
+import { useDebounce } from './hooks/useDebounce';
 
 function App() {
   const [query, setQuery] = useState('');
-  const [result, setResult] = useState<Product[]>([]);
+  const [results, setResults] = useState<Product[]>([]);
   const [isLoading, setLoading] = useState(false);
+
+  const debouncedSearchTerm = useDebounce(query, 300);
 
   const handleKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -19,8 +22,8 @@ function App() {
 
     try {
       const response = await searchProducts(word)
-      setResult(response);
-      console.log(response)
+      setResults(response);
+
     } catch(e) {
       console.error(e)
     } finally {
@@ -28,6 +31,23 @@ function App() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (debouncedSearchTerm) {
+        try {
+          const response = await searchProducts(query);
+          setResults(response);
+        } catch(e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchResults();
+  }, [debouncedSearchTerm, query]);
 
   return (
     <div className="app">
@@ -52,8 +72,14 @@ function App() {
         </button>
       </div>
       {/* TODO: 자동완성 목록 구현 */}
-      <div >
-
+      <div className=''>
+        {
+          results.map((r, i) => (
+            <ul key={i}>
+              <li>{r.name}</li>
+            </ul>
+          ))
+        }
       </div>
       {/* TODO: 최근 검색어 구현 */}
       <div>
